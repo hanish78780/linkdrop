@@ -19,14 +19,25 @@ psql "$PG_URL" -f db/schema.sql
 npm start
 ```
 
-The app listens on port 3000. Open http://localhost:3000 and drop a link.
+The app defaults to port 3000. Open http://localhost:3000 and drop a link.
+`HOST` defaults to `0.0.0.0` so a container reverse proxy can reach it;
+use `HOST=127.0.0.1` for a local-only development server.
 
 ## Configuration
 
 | Variable | What it is |
 |---|---|
 | `PG_URL` | PostgreSQL connection string, e.g. `postgresql://user:password@host:5432/linkdrop` |
-| `HOST` | Interface to listen on (optional) |
+| `DATABASE_URL` | Alternative PostgreSQL connection string; takes precedence over `PG_URL` when both are set |
+| `HOST` | Interface to listen on (default `0.0.0.0`) |
+| `PORT` | Listening port (default `3000`); set to the platform's assigned application port |
+
+On Selfhost, create a project PostgreSQL database, set its connection string
+as a private environment variable, and run `db/schema.sql` before serving the
+first request. Do not commit `.env` or publish the connection string.
+
+Run the local configuration regression checks with `npm test`.
+These checks do not prove a successful platform deployment or database connection.
 
 ## Health check
 
