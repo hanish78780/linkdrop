@@ -4,9 +4,18 @@ const config = require('./config');
 
 const pool = new Pool({ connectionString: config.databaseUrl, max: 5 });
 
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+}
+
+function isWebUrl(value) {
+  try { return ['http:', 'https:'].includes(new URL(value).protocol); }
+  catch { return false; }
+}
+
 function render(links) {
   const items = links
-    .map((l) => `<li><a href="${l.url}">${l.url}</a><p>${l.note}</p><time>${l.created_at.toISOString()}</time></li>`)
+    .map((l) => `<li>${isWebUrl(l.url) ? `<a href="${escapeHtml(l.url)}">${escapeHtml(l.url)}</a>` : escapeHtml(l.url)}<p>${escapeHtml(l.note)}</p><time>${l.created_at.toISOString()}</time></li>`)
     .join('\n');
   return `<!doctype html>
 <html lang="en">
@@ -79,6 +88,10 @@ const server = http.createServer(async (req, res) => {
       if (!url) {
         res.writeHead(400, { 'content-type': 'text/plain' });
         return res.end('A link needs a URL.');
+      }
+      if (!isWebUrl(url)) {
+        res.writeHead(400, { 'content-type': 'text/plain' });
+        return res.end('Use an absolute HTTP or HTTPS URL.');
       }
       await addLink(url, note);
       res.writeHead(303, { location: '/' });
