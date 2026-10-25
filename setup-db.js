@@ -7,7 +7,7 @@ async function main() {
   const client = new Client({ connectionString: config.databaseUrl, connectionTimeoutMillis: 10000 });
   try {
     await client.connect();
-    await client.query(await fs.readFile(`${__dirname}/schema.sql`, 'utf8'));
+    await client.query(await fs.readFile(`${__dirname}/db/schema.sql`, 'utf8'));
     console.log('Linkdrop schema ready.');
   } finally {
     await client.end();
