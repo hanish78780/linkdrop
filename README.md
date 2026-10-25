@@ -12,10 +12,9 @@ One Node.js process and one PostgreSQL table. No framework, one dependency (`pg`
 ## Run it locally
 
 ```bash
-npm install
+npm ci
 cp .env.example .env        # then edit PG_URL
 export $(cat .env | xargs)
-psql "$PG_URL" -f db/schema.sql
 npm start
 ```
 
@@ -32,12 +31,15 @@ use `HOST=127.0.0.1` for a local-only development server.
 | `HOST` | Interface to listen on (default `0.0.0.0`) |
 | `PORT` | Listening port (default `3000`); set to the platform's assigned application port |
 
-On Selfhost, create a project PostgreSQL database, set its connection string
-as a private environment variable, and run `db/schema.sql` before serving the
-first request. Do not commit `.env` or publish the connection string.
+On Selfhost, create a private project PostgreSQL database and set its connection
+string as a private environment variable. `npm start` runs `setup-db.js` to apply
+the idempotent `db/schema.sql` before starting the server. Do not commit `.env`
+or publish the connection string.
 
-Run the local configuration regression checks with `npm test`.
-These checks do not prove a successful platform deployment or database connection.
+Run `npm test` for configuration, HTTP input validation and HTML escaping checks.
+The HTTP tests use a PostgreSQL test double. These checks do not prove a successful
+platform deployment or live database connection. Link listing orders by
+`created_at DESC, id DESC` so ties remain deterministic and the newest 20 win.
 
 ## Health check
 
